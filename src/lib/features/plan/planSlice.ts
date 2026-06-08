@@ -15,16 +15,16 @@ export const planSlice = createApi({
       }),
     }),
     updatePlan: builder.mutation({
-      query: (credentials) => ({
-        url: apiRoutes.updateAPlan,
+      query: ({credentials, planId}) => ({
+        url: `${apiRoutes.updateAPlan}/${planId}`,
         method: "patch",
         data: credentials,
         params: {},
       }),
     }),
     fetchAllUserPlans: builder.query({
-      query: (userId) => ({
-        url: `${apiRoutes.getPlanById}/${userId}`,
+      query: () => ({
+        url: apiRoutes.getAllPlans,
         method: "get",
       }),
     }),

@@ -6,6 +6,8 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useFetchAllUserPlansQuery } from "@/lib/features/plan/planSlice";
 import secureLocalStorage from "react-secure-storage";
+import DetailsModal from "@/shared/Modals/DetailsModal";
+import EditPlan from "./EditPlan";
 
 interface PlansProps {
   id: number;
@@ -23,10 +25,8 @@ const Plans = () => {
   const [details, setDetails] = useState<any>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const { data: userPlans, isLoading: userPlansIsLoading } =
-    useFetchAllUserPlansQuery(user?.id, {
-      skip: !user?.id,
-    });
+  const { data: userPlans, isLoading: userPlansIsLoading, refetch:refetchPlans } =
+    useFetchAllUserPlansQuery(null);
 
     console.log("userPlans", userPlans)
 
@@ -47,7 +47,11 @@ const Plans = () => {
       key: "name",
       header: "Name",
     },
-    { key: "note", header: "Note" },
+    { key: "note", header: "Note", render:(row) => {
+      return(
+        <Typography sx={{fontSize:"1em"}}>{row?.note || "N/A"}</Typography>
+      )
+    } },
     {
       key: "date",
       header: "Date",
@@ -56,21 +60,15 @@ const Plans = () => {
   ];
 
   const menuItemList = [
+
     {
       id: 1,
-      title: "View",
-      method: () => setOpenViewModal(true),
-    },
-    {
-      id: 2,
       title: "Edit",
-      method: () => setOpenEditModal(true),
+      method: () =>{
+        setOpenEditModal(true)
+      } ,
     },
-    {
-      id: 3,
-      title: "Delete",
-      method: () => setOpenDeleteModal(true),
-    },
+
   ];
 
   useEffect(() => {
@@ -102,7 +100,7 @@ const Plans = () => {
           sx={{ width: "100%", display: "flex", justifyContent: "center" }}
         >
           <DataTable<PlansProps>
-            data={[]}
+            data={userPlans?.data ?? []}
             columns={planColumns}
             // toolbar={toolbar}
             anchorEl={anchorEl}
@@ -113,6 +111,10 @@ const Plans = () => {
           />
         </Grid>
       </Box>
+
+      <DetailsModal open={openEditModal} onClose={setOpenEditModal} >
+        <EditPlan details={details} refreshData={refetchPlans} closeModal={setOpenEditModal}  />
+      </DetailsModal>
     </Box>
   );
 };
